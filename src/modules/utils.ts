@@ -6,6 +6,7 @@ import { forEach } from 'lodash';
  * 显示 hello world
  */
 export const sayHello = function () {
+    //console.log('memoryUsage:'+ process.memoryUsage())
     //console.log('hello world! GameTime:'+Game.time /*+ " cpu:"+Game.cpu.bucket*/)
     //throw new Error('我是 sayHello 里的报错')
 }

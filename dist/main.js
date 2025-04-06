@@ -5367,10 +5367,9 @@ let pro = {
      * @param roomName
      */
     computeBlock(roomName) {
-        new RoomVisual(roomName);
+        const visual = new RoomVisual(roomName);
 
         roomWalkable.initRoomTerrainWalkAble(roomName);
-
         //计算距离山体要多远
         roomWalkable.forEach((x, y, val) => {
             if (!val) {
@@ -5494,64 +5493,93 @@ let pro = {
         // 颜色
         //routeDistance.forEach((x, y, val)=>{if(val>0)visual.circle(x, y, {fill: "#ff9797", radius: 0.5 ,opacity : 0.01*val+0.01})})
         //数字
-        //routeDistance.forEach((x, y, val)=>visual.text(Math.floor(val), x,y+0.25, {color: "white",opacity:0.75,fontSize: 7}))
+        // routeDistance.forEach((x, y, val) => visual.text(Math.floor(val), x, y + 0.25, {
+        //     color: "white",
+        //     opacity: 0.75,
+        //     fontSize: 7
+        // }))
         // 对距离的格子插入到队列 ，作为分开的顺序
         routeDistance.forEach((x, y, val) => {
             if (!roomWalkable.get(x, y)) return
             if (val) startPoint.push(NewNode(-val, x, y));
             //数字打印
-            //visual.text(Math.floor(nd.k), nd.x,nd.y+0.25, {color: "white",opacity:0.75,fontSize: 7})
+            //visual.text(Math.floor(val), x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
             //颜色打印
-            //{if(nd.k>0)visual.circle(nd.x, nd.y, {fill: "#ff9797", radius: 0.5 ,opacity : 0.05*nd.k+0.01})}
+            //visual.circle(x, y, {fill: "#ff9797", radius: 0.5 ,opacity : 0.02*val+0.10})
         });
 
 
         let sizeMap = {};
         let posSeqMap = {};
 
+        // console.log("startPointSize:"+startPoint.size())
+        // console.log("walkCount:"+walkCount)
+        // console.log("noWalkCount"+noWalkCount)
+
+        // 颜色
+        // nearWallWithInterpolation.forEach((x, y, val) => {
+        //     if (val > 0) visual.circle(x, y, {fill: "#ff9797", radius: 0.5, opacity: 0.01 * val + 0.01})
+        // })
+        //数字
+        // nearWallWithInterpolation.forEach((x, y, val) => visual.text(Math.floor(val), x, y + 0.25, {
+        //     color: "white",
+        //     opacity: 0.75,
+        //     fontSize: 7
+        // }))
+
         // 分块，将地图分成一小块一小块
         visited.init();
-        for (let i = 0; i < 100000; i++) {
-            if (startPoint.isEmpty()) break;
-            let cnt = 0;
-            // let color = randomColor(i)
+        let index = 0;
+        while (!startPoint.isEmpty()) {
+            index++;
+            let cnt = 0;//有意义的visited才有cnt的值
             let nd = startPoint.pop();
+            if(index === 1)
+            {
+                visual.circle(nd.x, nd.y, {fill: "#ffffffff", radius: 0.5, opacity: 0.5});
+            }
             //visual.circle(nd.x, nd.y, {fill: "#ff9797", radius: 0.5, opacity: 0.05 * -nd.k + 0.01})
             //visual.text(Math.floor(nd.k), nd.x,nd.y+0.25, {color: "white",opacity:0.75,fontSize: 7})
-
             let currentPos = nd.x * 50 + nd.y;
             let posSeq = [];
 
             //搜索分块
             let dfsFindDown = function (roomArray, x, y) {
-                let currentValue = roomArray.get(x, y);
                 if (!visited.exec(x, y, 1)) {
+                    let currentValue = roomArray.get(x, y);
                     roomArray.for4Direction((x1, y1, val) => {
                         if (val && (x1 === x || y1 === y) && val < currentValue) {
                             dfsFindDown(roomArray, x1, y1);
                         }
                     }, x, y);
                     cnt++;
-                    // visual.circle(x,y, {fill: color, radius: 0.5 ,opacity : 0.5})
+                    //visual.circle(x,y, {fill: '#ff9797', radius: 0.5 ,opacity : 0.5})
+                    //visual.text(index, x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
+
                     let pos = x * 50 + y;
                     posSeq.push(pos);
                     unionFind.union(currentPos, pos);
                 }
             };
-
             // 跑到最高点
             let dfsFindUp = function (roomArray, x, y) {
-                let currentValue = roomArray.get(x, y);
                 if (!visited.exec(x, y, 1)) {
+                    let currentValue = roomArray.get(x, y);
                     roomArray.forNear((x1, y1, val) => {
+                        //visual.text(index, x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
+                        //visual.circle(x1,y1, {fill: '#97ff97', radius: 0.5 ,opacity : 0.5*val})
+                        //周围点的值大于当前点的值，并且，当前点的值小于6，对于小区块的优化(向上搜索)
                         if (val > currentValue && currentValue < 6) { //加了一点优化，小于时分裂更过
                             dfsFindUp(roomArray, x1, y1);
-                        } else if (val && val < currentValue) {
+                        } // 周围点的值>0(非墙体) 并且周围点的值小于当前点的值(向下搜索)
+                        else if (val && val < currentValue) {
                             dfsFindDown(roomArray, x1, y1);
                         }
                     }, x, y);
                     cnt++;
-                    // visual.circle(x,y, {fill: color, radius: 0.5 ,opacity : 0.5})
+                    //visual.text((currentValue), x,y+0.25, {color: "white",opacity:0.75,fontSize: 3})
+                    //visual.text(Math.floor(cnt), x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
+                    //visual.circle(x,y, {fill: '#94ff5766', radius: 0.5 ,opacity : 0.5})
                     let pos = x * 50 + y;
                     posSeq.push(pos);
                     unionFind.union(currentPos, pos);
@@ -5568,22 +5596,15 @@ let pro = {
                 posSeqMap[pos] = posSeq;
             }
         }
-        // Object.keys(posSeqMap).forEach(pos => {
-        //     // posSeqMap[pos].forEach(e=>{            {
-        //     //     let y = e%50;
-        //     //     let x = ((e-y)/50);//Math.round
-        //     //     nearWallWithInterpolation.forEach((x, y, val)=>{if(val>0)visual.circle(x, y, {fill: "#ff9797", radius: 0.5 ,opacity : 0.05*pos+0.01})})
-        //     // }})
-        //     const posNum = Number(pos)
-        //     let y = posNum % 50;
-        //     let x = ((posNum - y) / 50);//Math.round
-        //
-        //     visual.circle(x, y, {fill: "#ff9797", radius: 0.5, opacity: 0.05 * posNum/100 + 0.01})
-        //     visual.text(Math.floor(sizeMap[pos]), x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
-        //
-        //     //console.log(pos)
-        //     //console.log(typeof pos)
-        // })
+        Object.keys(posSeqMap).forEach(pos => {
+            posSeqMap[pos].forEach(e=>{});
+
+            // visual.circle(x, y, {fill: "#ff9797", radius: 0.5, opacity: 0.05 * posNum/100 + 0.01})
+            // visual.text(Math.floor(sizeMap[pos]), x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
+
+            //console.log(pos)
+            //console.log(typeof pos)
+        });
 
         // 将出口附近的块删掉
         roomWalkable.forBorder((x, y, val) => {
@@ -5714,7 +5735,15 @@ let pro = {
         // })
 
         //块打印
-        //roomWalkable.forEach((x, y, val)=>{if(val>0&&sizeMap[unionFind.find(x*50+y)]>0)visual.circle(x, y, {fill: helpervisual.randomColor(unionFind.find(x*50+y)), radius: 0.5 ,opacity : 0.15})})
+        // roomWalkable.forEach((x, y, val) => {
+        //     if (val > 0 && sizeMap[unionFind.find(x * 50 + y)] > 0)
+        //         visual.circle(x, y, {
+        //                 fill: helpervisual.randomColor(unionFind.find(x * 50 + y)),
+        //                 radius: 0.5,
+        //                 opacity: 0.15
+        //             }
+        //         )
+        // })
 
 
         // 打印中间变量
@@ -6356,10 +6385,10 @@ let pro = {
 };
 
 commonjsGlobal.ManagerPlanner = pro;
-let globalT = true;
+let globalT = false;
 var _63_good = {
     run() {
-        console.log("run 63 planner");
+        //console.log("run 63 planner")
 
         let p = Game.flags.Flag1; // 触发器
         let pa = Game.flags.pa;
