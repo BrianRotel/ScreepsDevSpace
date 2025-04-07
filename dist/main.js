@@ -5554,7 +5554,7 @@ let pro = {
                     }, x, y);
                     cnt++;
                     //visual.circle(x,y, {fill: '#ff9797', radius: 0.5 ,opacity : 0.5})
-                    //visual.text(index, x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
+                    //visual.text(currentValue, x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
 
                     let pos = x * 50 + y;
                     posSeq.push(pos);
@@ -5590,21 +5590,43 @@ let pro = {
             //记录每一块的位置和大小 以 并查集的根节点 作为记录点
             if (cnt > 0) {
                 let pos = unionFind.find(currentPos);
+                //let randRomColor = helpervisual.randomColor(currentPos)
+                // visual.text(Math.floor(cnt), nd.x,nd.y+0.25, {color: "white",opacity:0.75,fontSize: 7})
+                // visual.circle(nd.x,nd.y, {fill: randRomColor, radius: 0.1 ,opacity : 1})
+                // posSeq.forEach((pos) => {
+                //     const posNum = Number(pos)
+                //     let y = posNum % 50;
+                //     let x = ((posNum - y) / 50);//Math.round
+                //     visual.circle(x, y, {
+                //         fill: randRomColor,
+                //         radius: 0.5,
+                //         opacity: 0.3 + 0.01
+                //     })
+                // })
                 // queMin.push({k:cnt,v:pos})
                 queMin.push(NewNode(cnt, 0, 0, pos));
                 sizeMap[pos] = cnt;
                 posSeqMap[pos] = posSeq;
             }
         }
-        Object.keys(posSeqMap).forEach(pos => {
-            posSeqMap[pos].forEach(e=>{});
-
-            // visual.circle(x, y, {fill: "#ff9797", radius: 0.5, opacity: 0.05 * posNum/100 + 0.01})
-            // visual.text(Math.floor(sizeMap[pos]), x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
-
-            //console.log(pos)
-            //console.log(typeof pos)
-        });
+        // Object.keys(posSeqMap).forEach(pos => {
+        //     let randRomColor = helpervisual.randomColor(pos)
+        //     posSeqMap[pos].forEach(e=>{            {
+        //             let y = e % 50;
+        //             let x = ((e - y) / 50);//Math.round
+        //             visual.circle(x, y, {
+        //                 fill: randRomColor,
+        //                 radius: 0.5,
+        //                 opacity: 0.3 + 0.01
+        //             })
+        //     }})
+        //     //并查集根节点
+        //     const posNum = Number(pos)
+        //     let y = posNum % 50;
+        //     let x = ((posNum - y) / 50);//Math.round
+        //      visual.circle(x, y, {fill: "#ff9797", radius: 0.1, opacity: 1})
+        //      visual.text(Math.floor(sizeMap[pos]), x,y+0.25, {color: "white",opacity:0.75,fontSize: 7})
+        // })
 
         // 将出口附近的块删掉
         roomWalkable.forBorder((x, y, val) => {
